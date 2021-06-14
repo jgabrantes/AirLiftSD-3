@@ -5,13 +5,22 @@
  */
 package Repository.MainProgram;
 
-import EntitiesState.PilotState;
-import EntitiesState.PassengerState;
-import EntitiesState.HostessState;
-import Communications.ServerCom;
-import Repository.Proxies.RepositoryProxy;
-import Repository.Proxies.ServiceProvider;
-import java.net.SocketTimeoutException;
+
+import Repository.EntitiesState.HostessState;
+import Repository.EntitiesState.PassengerState;
+import Repository.EntitiesState.PilotState;
+import Repository.Interfaces.RegisterInterface;
+import Repository.Interfaces.RepositoryInterface;
+import java.rmi.AlreadyBoundException;
+import java.rmi.NotBoundException;
+
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 /**
  *
@@ -23,13 +32,30 @@ public class RepositoryMain {
     
     
     public static void main(String [] args){
+           
+        /* get location of the registry service */
+        String rmiRegHostName = Parameters.REGISTRY_HOST_NAME;
+        int rmiRegPortNumb = Parameters.REGISTRY_PORT;
         
-        /**
-         * Communication channels
-         */
-        ServerCom sCom, sComi;
-        ServiceProvider serviceProv;
+        String nameEntryBase = Parameters.REGISTER_HANDLER;
+        String nameEntryObject = Parameters.REPOSITORY_HANDLER;
+        Registry registry = null;
+        RegisterInterface registerInt = null;
         
+        /* create and install the security manager */
+        if (System.getSecurityManager () == null)
+            System.setSecurityManager (new SecurityManager ());
+        
+        /* Get the RMI server registry */
+        try
+        { registry = LocateRegistry.getRegistry (rmiRegHostName, rmiRegPortNumb);
+        }
+        catch (RemoteException e)
+        { System.out.println("RMI registry locate exception: " + e.getMessage ());
+          e.printStackTrace ();
+          System.exit (1);
+        }
+      
         /**
          * Initialization of parameters
          */
@@ -48,29 +74,102 @@ public class RepositoryMain {
          * Shared region and proxy initialization
          */
         Repository repo = new Repository(passengerIds, pilotState, hostessState, passengerState);
-        repo.initLogging();
-        RepositoryProxy repoProxy = new RepositoryProxy(repo);
-        
-        /**
-         * Start listening at the communication channel
-         */
-        System.out.println("-------------------------------REPOSITORY--------------------------");
-        sCom = new ServerCom(Parameters.REPOSITORY_PORT);
-        sCom.start();
-        
-        /**
-         * while the service is not terminated, accept connections and redirects them to de Service Provider
-         */
-        
-        while(!serviceEnd){
-            try{
-                sComi = sCom.accept();
-                serviceProv = new ServiceProvider(sComi, repoProxy);
-                serviceProv.start();
-            }catch(SocketTimeoutException e){
-            }
-           
+        RepositoryInterface repoInt = null;
+        try {
+            repo.initLogging();
+        } catch (RemoteException ex) {
+            Logger.getLogger(RepositoryMain.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.print("Communication channel closed");
+        try {
+            repo.initLogging();
+        } catch (RemoteException ex) {
+            Logger.getLogger(RepositoryMain.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        try
+        { repoInt = (RepositoryInterface) UnicastRemoteObject.exportObject (repo, Parameters.REPOSITORY_PORT);
+        }
+        catch (RemoteException e)
+        { System.out.println ("Repository stub generation exception: " + e.getMessage ());
+          e.printStackTrace ();
+          System.exit (1);
+        }
+        
+        /* register it with the general registry service */
+        try
+        {   
+            registerInt = (RegisterInterface) registry.lookup (nameEntryBase);
+        }
+        catch (RemoteException e)
+        { System.out.println ("Register lookup exception: " + e.getMessage ());
+          e.printStackTrace ();
+          System.exit (1);
+        }
+        catch (NotBoundException e)
+        { System.out.println ("Register not bound exception: " + e.getMessage ());
+          e.printStackTrace ();
+          System.exit (1);
+        }
+        
+        try
+        {   
+            registerInt.bind (nameEntryObject, repoInt);
+        }
+        catch (RemoteException e)
+        { System.out.println ("Repository registration exception: " + e.getMessage ());
+          e.printStackTrace ();
+          System.exit (1);
+        }
+        catch (AlreadyBoundException e)
+        { System.out.println ("Repository already bound exception: " + e.getMessage ());
+          e.printStackTrace ();
+          System.exit (1);
+        }
+        System.out.println ("Repository object was registered!");
+        
+        /* Wait for the service to end */
+        while(!serviceEnd){
+            try {
+                synchronized(repo){
+                    repo.wait();
+                }
+            } catch (InterruptedException ex) {
+                System.out.println("Main thread of repo was interrupted.");
+                System.exit(1);
+            }
+        }
+        
+        System.out.println("Repository finished execution.");
+        
+        /* Unregister shared region */
+        try
+        { registerInt.unbind (nameEntryObject);
+        }
+        catch (RemoteException e)
+        { System.out.println ("Repository unregistration exception: " + e.getMessage ());
+          e.printStackTrace ();
+          System.exit (1);
+        } catch (NotBoundException ex) {
+          System.out.println ("Repository unregistration exception: " + ex.getMessage ());
+          ex.printStackTrace ();
+          System.exit (1);
+        }
+        System.out.println ("Repository object was unregistered!");
+        
+        /* Unexport shared region */
+        try
+        { UnicastRemoteObject.unexportObject (repo, false);
+        }
+        catch (RemoteException e)
+        { System.out.println ("Repository unexport exception: " + e.getMessage ());
+          e.printStackTrace ();
+          System.exit (1);
+        }
+        
+        System.out.println ("Repository object was unexported successfully!");
+       
+        
+      
+      
     }
 }

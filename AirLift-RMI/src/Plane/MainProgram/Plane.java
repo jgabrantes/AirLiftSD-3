@@ -6,22 +6,25 @@
 package Plane.MainProgram;
 
 
-import EntitiesState.PilotState;
-import EntitiesState.HostessState;
-import Plane.MainProgram.PlaneMain;
-import Plane.Stubs.RepositoryStub;
+
+import Plane.EntitiesState.HostessState;
+import Plane.EntitiesState.PilotState;
+import Plane.Interfaces.*;
+import java.rmi.RemoteException;
+
+
 
 /**
  *
  * @author jgabrantes
  */
-public class Plane {
+public class Plane implements PlaneInterface {
     private boolean  arrivalAnnounced, readyToFly;
     private int passengersBoarded;    
-    private RepositoryStub repo;
+    private RepositoryInterface repo;
     
     
-    public Plane(RepositoryStub repo){
+    public Plane(RepositoryInterface repo){
         this.repo =repo;
     }
     
@@ -29,7 +32,8 @@ public class Plane {
      *
      * @param boarded
      */
-    public synchronized void informPlaneReadyToTakeoff(int boarded){
+    @Override
+    public synchronized void informPlaneReadyToTakeoff(int boarded)throws RemoteException{
         System.out.println("Hostess: Informing pilot that the plane is ready to take off");
         repo.flightDeparted();
         repo.updateHostessState(HostessState.READY_TO_FLY);
@@ -42,7 +46,8 @@ public class Plane {
      *
      * @return
      */
-    public  synchronized  int waitForAllInBoard() 
+    @Override
+    public  synchronized  int waitForAllInBoard() throws RemoteException 
     {        
         System.out.println("EYYYYYYYOOOOOOOO");
         repo.updatePilotState(PilotState.WAIT_FOR_BOARDING);
@@ -68,7 +73,8 @@ public class Plane {
     /**
      *
      */
-    public synchronized void flyToDestinationPoint() {
+    @Override
+    public synchronized void flyToDestinationPoint() throws RemoteException {
        
         System.out.println("Pilot: LIFT OF");           
         repo.updatePilotState(PilotState.FLYING_FORWARD);
@@ -77,7 +83,8 @@ public class Plane {
     /**
      *
      */
-    public  synchronized void  announceArrival() {
+    @Override
+    public  synchronized void  announceArrival() throws RemoteException {
         System.out.println("Passangers able to deboard");
         repo.flightArrived();
         repo.updatePilotState(PilotState.DEBOARDING);
@@ -88,7 +95,8 @@ public class Plane {
     /**
      *
      */
-    public synchronized void waitForEndOfFlight() {
+    @Override
+    public synchronized void waitForEndOfFlight()throws RemoteException {
               
        while(!arrivalAnnounced){
            try{
@@ -104,14 +112,16 @@ public class Plane {
     /**
      *
      */
-    public synchronized void flyToDeparturePoint() {
+    @Override
+    public synchronized void flyToDeparturePoint() throws RemoteException {
         arrivalAnnounced = false;
         System.out.println("Pilot:flying back");
         repo.flyingBack();
         repo.updatePilotState(PilotState.FLYING_BACK);
     }    
 
-    public  synchronized void finish() {
+    @Override
+    public  synchronized void finish() throws RemoteException{
         PlaneMain.serviceEnd = true;
     }
 

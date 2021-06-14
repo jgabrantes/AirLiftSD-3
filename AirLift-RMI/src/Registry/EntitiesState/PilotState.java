@@ -3,37 +3,49 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package EntitiesState;
+package Registry.EntitiesState;
+
+
 
 /**
  *
  * @author jgabrantes
  */
-public enum PassengerState {
+public enum PilotState {
 
     /**
      *
      */
-    GOING_TO_AIRPORT ("GTAP"),
+    AT_TRANFER_GATE ("ATRG"),
 
     /**
      *
      */
-    IN_QUEUE ("INQE"),
+    READY_FOR_BOARDING("RDFB"),
 
     /**
      *
      */
-    IN_FLIGHT ("INFL"),
+    WAIT_FOR_BOARDING("WTFB"),
 
     /**
      *
      */
-    AT_DESTINATION ("ATDS");
+    FLYING_FORWARD("FLFW"),
 
+    /**
+     *
+     */
+    DEBOARDING("DRPP"),
+
+    /**
+     *
+     */
+    FLYING_BACK("FLBK");
+    
+    
     private final String state;
-
-    private PassengerState(String description){
+    private PilotState(String description){
         this.state = description;
     }
 
@@ -42,7 +54,8 @@ public enum PassengerState {
      * @return
      */
     @Override
-    public String toString(){
+    public String toString() {
         return this.state;
     }
+    
 }

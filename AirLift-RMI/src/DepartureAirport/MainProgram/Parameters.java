@@ -6,6 +6,7 @@
 package DepartureAirport.MainProgram;
 
 
+
 import java.util.Date;
 
 /**
@@ -44,11 +45,19 @@ public class Parameters {
     /**
      * 
      */
+    public final static String REPOSITORY_HANDLER = "RepositoryHandler";
+    /**
+     * 
+     */
     public final static String DEPARTURE_AIRPORT_HOST_NAME = "l040101-ws02.ua.pt";
     /**
      * 
      */
     public final static int DEPARTURE_AIRPORT_PORT =22112;
+    /**
+     * 
+     */
+    public final static String DEPARTURE_AIRPORT_HANDLER = "DepartureAirportHandler";
     /**
      * 
      */
@@ -60,6 +69,10 @@ public class Parameters {
     /**
      * 
      */
+    public final static String DESTINATION_AIRPORT_HANDLER ="DestinationAirportHandler";
+    /**
+     * 
+     */
     public final static String PLANE_HOST_NAME = "l040101-ws04.ua.pt";
     /**
      * 
@@ -68,4 +81,26 @@ public class Parameters {
     /**
      * 
      */
+    public final static String PLANE_HANDLER = "PlaneHandler";
+    /**
+     * 
+     */
+    public final static String REGISTRY_HOST_NAME = "l040101-ws05.ua.pt";
+    /**
+     *
+     */
+    public final static int REGISTRY_PORT = 22115;
+     /**
+     * 
+     */
+    public final static String REGISTER_HANDLER = "RegisterHandler";
+    /**
+     * 
+     */
+    public final static String SERVER_REGISTRY_HOST_NAME = "l040101-ws08.ua.pt";
+    /**
+     *
+     */
+    public final static int SERVER_REGISTRY_PORT = 22116;
+    
 }

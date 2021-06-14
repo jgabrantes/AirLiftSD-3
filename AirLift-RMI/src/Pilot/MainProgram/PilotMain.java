@@ -5,16 +5,13 @@
  */
 package Pilot.MainProgram;
 
-import Pilot.MainProgram.Parameters.*;
-import static Pilot.MainProgram.Parameters.DEPARTURE_AIRPORT_HOST_NAME;
-import static Pilot.MainProgram.Parameters.DEPARTURE_AIRPORT_PORT;
-import static Pilot.MainProgram.Parameters.DESTINATION_AIRPORT_HOST_NAME;
-import static Pilot.MainProgram.Parameters.DESTINATION_AIRPORT_PORT;
-import static Pilot.MainProgram.Parameters.PLANE_HOST_NAME;
-import static Pilot.MainProgram.Parameters.PLANE_PORT;
-import static Pilot.MainProgram.Parameters.REPOSITORY_HOST_NAME;
-import static Pilot.MainProgram.Parameters.REPOSITORY_PORT;
-import Pilot.Stubs.*;
+import Pilot.Interfaces.*;
+import Pilot.Interfaces.RepositoryInterface;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+
 
 /**
  * Pilot launcher
@@ -26,18 +23,93 @@ public class PilotMain {
      */
     public static void main(String [] args){
         
-        DepartureAirportStub depAirport = new DepartureAirportStub(DEPARTURE_AIRPORT_HOST_NAME, DEPARTURE_AIRPORT_PORT);
-        PlaneStub plane = new PlaneStub(PLANE_HOST_NAME, PLANE_PORT );
-        DestinationAirportStub destAirport = new DestinationAirportStub(DESTINATION_AIRPORT_HOST_NAME, DESTINATION_AIRPORT_PORT);
-        RepositoryStub repo = new RepositoryStub(REPOSITORY_HOST_NAME, REPOSITORY_PORT);
-        Pilot pilot = new Pilot(0,depAirport,destAirport, plane, repo );
-        System.out.println("-------------------------------PILOT --------------------------");
-        pilot.start();
+        String regHostName = Parameters.REGISTRY_HOST_NAME;
+        int regPortNum = Parameters.REGISTRY_PORT;
+        String entry = Parameters.REGISTER_HANDLER;
+        Registry registry = null;
+        
+        
+        DepartureAirportInterface depAirport = null;
+        PlaneInterface plane = null;
+        DestinationAirportInterface destAirport = null;
+        RepositoryInterface repo = null;
+        
         
         try{
+            registry = LocateRegistry.getRegistry(regHostName, regPortNum);
+        }catch(RemoteException e){
+            System.out.println("RMI registry creation exception: " + e.getMessage ());
+            e.printStackTrace ();
+            System.exit (1);
+        }
+        System.out.println("RMI registry was created!");
+        
+       
+        try
+        {
+            depAirport = (DepartureAirportInterface) registry.lookup (Parameters.DEPARTURE_AIRPORT_HANDLER);
+        }
+        catch (NotBoundException ex) {
+            System.out.println("Departure Airport is not registered: " + ex.getMessage () );
+            ex.printStackTrace ();
+            System.exit(1);
+        } catch (RemoteException ex) {
+            System.out.println("Exception thrown while locating Departure Airport: " + ex.getMessage () );
+            ex.printStackTrace ();
+            System.exit (1);
+        }
+        
+        try
+        {
+            destAirport = (DestinationAirportInterface) registry.lookup (Parameters.DESTINATION_AIRPORT_HANDLER);
+        }
+        catch (NotBoundException ex) {
+            System.out.println("Destination Airport is not registered: " + ex.getMessage () );
+            ex.printStackTrace ();
+            System.exit(1);
+        } catch (RemoteException ex) {
+            System.out.println("Exception thrown while locating Destination Airport: " + ex.getMessage () );
+            ex.printStackTrace ();
+            System.exit (1);
+        }
+        
+        try
+        {
+            plane = (PlaneInterface) registry.lookup (Parameters.PLANE_HANDLER);
+        }
+        catch (NotBoundException ex) {
+            System.out.println("Plane is not registered: " + ex.getMessage () );
+            ex.printStackTrace ();
+            System.exit(1);
+        } catch (RemoteException ex) {
+            System.out.println("Exception thrown while locating Plane: " + ex.getMessage () );
+            ex.printStackTrace ();
+            System.exit (1);
+        }
+        
+        try
+        {
+            repo = (RepositoryInterface) registry.lookup (Parameters.REPOSITORY_HANDLER);
+        }
+        catch (NotBoundException ex) {
+            System.out.println("Repository is not registered: " + ex.getMessage () );
+            ex.printStackTrace ();
+            System.exit(1);
+        } catch (RemoteException ex) {
+            System.out.println("Exception thrown while locating Repository: " + ex.getMessage () );
+            ex.printStackTrace ();
+            System.exit (1);
+        }
+        
+        System.out.println("-----------------------PILOT---------------------------------");
+        
+        Pilot pilot = new Pilot(0,depAirport,destAirport,plane,repo);
+        
+        pilot.start();
+        
+        try {
             pilot.join();
         }catch(InterruptedException e){}
-        
         
         
     }

@@ -1,6 +1,7 @@
 package Passenger.MainProgram;
 import Passenger.EntitiesState.PassengerState;
-import Passenger.Stubs.*;
+import Passenger.Interfaces.*;
+import java.rmi.RemoteException;
 
 
 /**
@@ -16,15 +17,15 @@ public class Passenger extends Thread {
     /**
      * DestinationAirport Stub
      */
-    private  DestinationAirportStub destAirport;
+    private  DestinationAirportInterface destAirport;
     /**
      * DepartureAirport Stub
      */
-    private final DepartureAirportStub depAirport;
+    private final DepartureAirportInterface depAirport;
     /**
      * Plane Stub
      */
-    private final PlaneStub plane;
+    private final PlaneInterface plane;
     /**
      * PassengerState
      */
@@ -38,7 +39,7 @@ public class Passenger extends Thread {
      * @param destAirport
      * @param plane
      */
-    public Passenger(int id, DepartureAirportStub depAirport,  DestinationAirportStub destAirport, PlaneStub plane) {
+    public Passenger(int id, DepartureAirportInterface depAirport,  DestinationAirportInterface destAirport, PlaneInterface plane) {
         this.id = id;
         this.destAirport = destAirport;
         this.depAirport = depAirport;
@@ -83,20 +84,27 @@ public class Passenger extends Thread {
     @Override
     public void run() {
         
-       depAirport.travelToAirport();
+       try{
+         depAirport.travelToAirport();
        
         try {
             this.sleep((long)(Math.random() * 1000));
             } catch (InterruptedException ex) {}
        
-       depAirport.waitInQueue();
+        depAirport.waitInQueue();
        
-       depAirport.showDocuments(this.id);
+        depAirport.showDocuments(this.id);
        
-       depAirport.boardThePlane();
+        depAirport.boardThePlane();
        
-       plane.waitForEndOfFlight();
+        plane.waitForEndOfFlight();
        
-       destAirport.leaveThePlane();
+        destAirport.leaveThePlane();  
+        } catch (RemoteException ex) {
+           System.out.println("Remote exception: " + ex.getMessage ());
+           ex.printStackTrace ();
+           System.exit (1);
+        }
+       
     }
 }

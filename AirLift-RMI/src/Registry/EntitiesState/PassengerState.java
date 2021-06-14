@@ -3,37 +3,37 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package EntitiesState;
+package Registry.EntitiesState;
 
 /**
  *
  * @author jgabrantes
  */
-public enum HostessState {
+public enum PassengerState {
 
     /**
      *
      */
-    WAIT_FOR_FLIGHT ("WTFL"),
+    GOING_TO_AIRPORT ("GTAP"),
 
     /**
      *
      */
-    WAIT_FOR_PASSENGER ("WTPS"),
+    IN_QUEUE ("INQE"),
 
     /**
      *
      */
-    CHECK_PASSENGER ("CKPS"),
+    IN_FLIGHT ("INFL"),
 
     /**
      *
      */
-    READY_TO_FLY ("RDTF");
+    AT_DESTINATION ("ATDS");
 
     private final String state;
 
-    private HostessState(String description){
+    private PassengerState(String description){
         this.state = description;
     }
 

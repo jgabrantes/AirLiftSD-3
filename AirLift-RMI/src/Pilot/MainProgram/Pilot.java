@@ -1,8 +1,10 @@
 package Pilot.MainProgram;
 
+import Pilot.Interfaces.*;
 import Pilot.EntitiesState.PilotState;
-import Pilot.MainProgram.Parameters;
-import Pilot.Stubs.*;
+import Pilot.Interfaces.RepositoryInterface;
+import java.rmi.RemoteException;
+
 
 /**
  *
@@ -18,17 +20,17 @@ public class Pilot extends Thread {
     /**
      * Departure Airport Stub
      */
-    private  DepartureAirportStub depAirport;
+    private  DepartureAirportInterface depAirport;
     
     /**
      * Destination Airport Stub
      */
-    private DestinationAirportStub destAirport;
+    private DestinationAirportInterface destAirport;
     
     /**
      * Plane Stub
      */
-    private PlaneStub  plane;
+    private PlaneInterface  plane;
     
     /**
      * Pilot's State
@@ -38,7 +40,7 @@ public class Pilot extends Thread {
     /**
      * Repository Stub
      */
-    private RepositoryStub repo;
+    private RepositoryInterface repo;
     
     /**
      * Total number of passengers
@@ -55,7 +57,7 @@ public class Pilot extends Thread {
      * @param destAirport
      * @param plane
      */
-    public Pilot(int id, DepartureAirportStub depAirport, DestinationAirportStub destAirport, PlaneStub plane, RepositoryStub repo) {
+    public Pilot(int id, DepartureAirportInterface depAirport, DestinationAirportInterface destAirport, PlaneInterface plane, RepositoryInterface repo) {
         this.id = id;
         this.depAirport = depAirport;
         this.destAirport = destAirport;
@@ -69,7 +71,8 @@ public class Pilot extends Thread {
      */
     @Override
     public void run() {
-        
+        try{
+            
         int i = 0;
         while(passengersMoved < nPassengers){
             
@@ -106,6 +109,11 @@ public class Pilot extends Thread {
         depAirport.finish();
         destAirport.finish();
         plane.finish();
+        } catch (RemoteException ex) {
+            System.out.println("Remote exception: " + ex.getMessage ());
+            ex.printStackTrace ();
+            System.exit (1);
+        }
     }
     
     /**
@@ -144,7 +152,7 @@ public class Pilot extends Thread {
      *
      * @param repository
      */
-    public synchronized void setRepository(RepositoryStub repository){
+    public synchronized void setRepository(RepositoryInterface repository){
         this.repo = repository;
     }
     

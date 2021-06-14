@@ -5,16 +5,12 @@
  */
 package Repository.MainProgram;
 
-import EntitiesState.PassengerState;
-import EntitiesState.PilotState;
-import EntitiesState.HostessState;
-import Repository.MainProgram.Parameters;
-import Repository.MainProgram.RepositoryMain;
+import Repository.EntitiesState.*;
+import Repository.Interfaces.RepositoryInterface;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +19,7 @@ import java.util.List;
  *
  * @author jgabrantes
  */
-public class Repository {
+public class Repository implements RepositoryInterface {
     
     
     private int inQueue, inPlane, outPlane, flightNum;
@@ -55,7 +51,8 @@ public class Repository {
     /**
      *
      */
-    public synchronized void initLogging(){
+    @Override
+    public synchronized void initLogging() throws RemoteException{
         
         try{
             
@@ -89,7 +86,8 @@ public class Repository {
     /**
      *
      */
-    public synchronized void printLogging(){
+    @Override
+    public synchronized void printLogging() throws RemoteException{
        try{
            
            FileWriter fw = new FileWriter(Parameters.FILENAME, true);
@@ -118,7 +116,8 @@ public class Repository {
      *
      * @param pilotState
      */
-    public synchronized void updatePilotState(PilotState pilotState){
+    @Override
+    public synchronized void updatePilotState(PilotState pilotState) throws RemoteException{
         this.pilotState = pilotState;
         this.printLogging();
     }
@@ -127,7 +126,8 @@ public class Repository {
      *
      * @param hostessState
      */
-    public synchronized void updateHostessState(HostessState hostessState){
+    @Override
+    public synchronized void updateHostessState(HostessState hostessState)throws RemoteException{
         this.hostessState = hostessState;
         this.printLogging();
     }
@@ -137,7 +137,8 @@ public class Repository {
      * @param idx
      * @param passengerState
      */
-    public synchronized void updatePassengerState(int idx, PassengerState passengerState){
+    @Override
+    public synchronized void updatePassengerState(int idx, PassengerState passengerState) throws RemoteException{
         for(int i = 0; i<passengerIds.length; i++){
             if(passengerIds[i] == idx) this.passengerState[i] = passengerState;
         }
@@ -147,28 +148,32 @@ public class Repository {
     /**
      *
      */
-    public synchronized void inQueue(){
+    @Override
+    public synchronized void inQueue() throws RemoteException{
         this.inQueue += 1;
     }
 
     /**
      *
      */
-    public synchronized void outQueue(){
+    @Override
+    public synchronized void outQueue() throws RemoteException{
         this.inQueue -= 1;
     }
     
     /**
      *
      */
-    public synchronized void inPlane(){
+    @Override
+    public synchronized void inPlane() throws RemoteException{
         this.inPlane += 1;
     }
     
     /**
      *
      */
-    public synchronized void outPlane(){
+    @Override
+    public synchronized void outPlane() throws RemoteException{
         this.inPlane -= 1;
         this.outPlane += 1;
     }
@@ -177,7 +182,8 @@ public class Repository {
      *
      * @param passengerID
      */
-    public synchronized void passengerChecked(int passengerID){
+    @Override
+    public synchronized void passengerChecked(int passengerID) throws RemoteException{
          
         try {
             FileWriter fw = new FileWriter(Parameters.FILENAME, true);
@@ -195,7 +201,8 @@ public class Repository {
     /**
      *
      */
-    public synchronized void boardingStarted(){
+    @Override
+    public synchronized void boardingStarted() throws RemoteException{
         try {
            FileWriter fw = new FileWriter(Parameters.FILENAME, true);
            BufferedWriter bw = new BufferedWriter(fw);
@@ -213,7 +220,8 @@ public class Repository {
     /**
      *
      */
-    public synchronized void flightDeparted(){
+    @Override
+    public synchronized void flightDeparted() throws RemoteException{
         try {
                FileWriter fw = new FileWriter(Parameters.FILENAME, true);
                BufferedWriter bw = new BufferedWriter(fw);
@@ -231,7 +239,8 @@ public class Repository {
     /**
      *
      */
-    public synchronized void flightArrived(){
+    @Override
+    public synchronized void flightArrived() throws RemoteException{
         try {
             FileWriter fw = new FileWriter(Parameters.FILENAME, true);
             BufferedWriter bw = new BufferedWriter(fw);
@@ -248,7 +257,8 @@ public class Repository {
     /**
      *
      */
-    public synchronized void flyingBack(){
+    @Override
+    public synchronized void flyingBack() throws RemoteException{
         try {
             FileWriter fw = new FileWriter(Parameters.FILENAME, true);
             BufferedWriter bw = new BufferedWriter(fw);
@@ -266,7 +276,8 @@ public class Repository {
      *
      * @param flights
      */
-    public synchronized void sumUp(int [] flights){
+    @Override
+    public synchronized void sumUp(int [] flights) throws RemoteException{
         try {
             FileWriter fw = new FileWriter(Parameters.FILENAME, true);
             BufferedWriter bw = new BufferedWriter(fw);
@@ -285,9 +296,11 @@ public class Repository {
             System.exit(1);
          }        
     }
-
-    public  synchronized void finish() {
+    @Override
+    public  synchronized void finish()  throws RemoteException{
         RepositoryMain.serviceEnd = true;
     }
+
+   
     
 }
